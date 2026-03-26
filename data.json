@@ -6,7 +6,8 @@
     { "name": "MagicOffsets", "val": "0x46C4660", "status": "updated" },
     { "name": "MeshComponent", "val": "0x04E8", "status": "updated" },
     { "name": "BypassPakSigning", "val": "0xC4472A8", "status": "updated" },
-    { "name": "Mount", "val": "0x282CC50", "status": "updated" }
+    { "name": "Mount", "val": "0x282CC50", "status": "updated" },
+    { "name": "DamageHandler", "val": "0x0C68", "status": "updated" }
   ],
   "sigs": [
     { "name": "ProcessEvent", "status": "updated", "sig": "40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC 50 01 00 00" }
