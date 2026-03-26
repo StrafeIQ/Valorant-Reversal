@@ -15,6 +15,7 @@
             --text-dim: #8b949e;
             --ida-gray: #30363d;
             --discord-blurple: #5865F2;
+            --success-green: #238636;
         }
 
         * {
@@ -53,15 +54,15 @@
             opacity: 0.12;
         }
 
-        @keyframes fadeInScale {
-            from {
+        @keyframes popIn {
+            0% {
                 opacity: 0;
-                transform: translateY(15px) scale(0.98);
+                transform: translate(-50%, 20px);
             }
 
-            to {
+            100% {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translate(-50%, 0);
             }
         }
 
@@ -109,7 +110,7 @@
         #searchBar {
             flex: 1;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid var(--ida-gray);
             background: var(--card-bg);
             color: white;
@@ -119,7 +120,6 @@
 
             #searchBar:focus {
                 border-color: var(--accent-blue);
-                box-shadow: 0 0 15px var(--accent-glow);
             }
 
         .discord-btn {
@@ -127,18 +127,17 @@
             color: white;
             text-decoration: none;
             padding: 16px 30px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
-            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.2s ease;
         }
 
             .discord-btn:hover {
                 filter: brightness(1.2);
-                transform: scale(1.05) translateY(-3px);
-                box-shadow: 0 5px 20px rgba(88, 101, 242, 0.5);
+                transform: translateY(-2px);
             }
 
         .section-title {
@@ -163,26 +162,36 @@
             background: var(--card-bg);
             border: 1px solid var(--ida-gray);
             backdrop-filter: blur(12px);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            animation: fadeInScale 0.5s forwards;
+            border-radius: 8px;
+            transition: 0.15s ease-in-out;
             opacity: 0;
+            animation: fadeIn 0.4s forwards;
         }
 
-            .interactive:hover {
-                border-color: var(--accent-blue);
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
             }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .interactive:hover {
+            border-color: var(--accent-blue);
+            transform: scale(1.02) translateY(-2px);
+            background: rgba(88, 166, 255, 0.05);
+        }
 
         .offset-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 15px;
         }
 
         .offset-card {
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -197,7 +206,7 @@
 
         .sig-row {
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .sig-data {
@@ -206,7 +215,7 @@
             color: var(--text-dim);
             background: rgba(0,0,0,0.3);
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 4px;
             margin-top: 10px;
             border: 1px dashed var(--ida-gray);
         }
@@ -223,21 +232,23 @@
         #toast {
             visibility: hidden;
             position: fixed;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            background: white;
-            color: black;
-            padding: 12px 35px;
-            border-radius: 50px;
-            font-weight: 900;
+            background: var(--success-green);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 4px;
+            font-weight: bold;
             z-index: 10000;
-            letter-spacing: 1px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .show {
             visibility: visible !important;
-            animation: fadeInScale 0.3s ease;
+            animation: popIn 0.2s ease-out;
         }
     </style>
 </head>
@@ -264,7 +275,7 @@
         </div>
     </div>
 
-    <div id="toast">COPIED!</div>
+    <div id="toast">Value copied to clipboard!</div>
 
     <script>
         const canvas = document.getElementById('bg-canvas');
@@ -306,12 +317,11 @@
         async function loadData() {
         try {
         const res = await fetch('./data.json');
-        if (!res.ok) throw new Error('Data file not found');
+        if (!res.ok) throw new Error();
         const data = await res.json();
         render(data);
         } catch (err) {
-        console.error(err);
-        document.getElementById('content').innerHTML = `<p style="text-align:center; color:red; margin-top:50px;">Failed to load data.json. Ensure file is in the root directory.</p>`;
+        document.getElementById('content').innerHTML = `<p style="text-align:center; color:red; margin-top:50px;">Check data.json formatting.</p>`;
         }
         }
 
@@ -323,7 +333,7 @@
         data.offsets.forEach((o, i) => {
         const el = document.createElement('div');
         el.className = 'offset-card interactive';
-        el.style.animationDelay = (i * 0.04) + 's';
+        el.style.animationDelay = (i * 0.03) + 's';
         el.onclick = () => copy(o.val);
         el.innerHTML = `<div><b>${o.name}</b><br><span class="val-text">${o.val}</span></div><i class="far fa-copy" style="opacity:0.2"></i>`;
         oGrid.appendChild(el);
@@ -332,7 +342,7 @@
         data.sigs.forEach((s, i) => {
         const el = document.createElement('div');
         el.className = 'sig-row interactive';
-        el.style.animationDelay = (i * 0.08) + 's';
+        el.style.animationDelay = (i * 0.05) + 's';
         el.onclick = () => copy(s.sig);
         el.innerHTML = `<div style="display:flex; justify-content:space-between"><b>${s.name}</b><i class="fas fa-fingerprint" style="color:var(--accent-blue)"></i></div><div class="sig-data">${s.sig}</div>`;
         sGrid.appendChild(el);
@@ -359,10 +369,10 @@
         navigator.clipboard.writeText(text);
         const t = document.getElementById('toast');
         t.className = "show";
-        setTimeout(() => { t.className = ""; }, 1500);
+        setTimeout(() => { t.className = ""; }, 2000);
 
-        cursor.style.transform = "scale(1.8)";
-        setTimeout(() => { cursor.style.transform = "scale(1)"; }, 150);
+        cursor.style.transform = "scale(1.5)";
+        setTimeout(() => { cursor.style.transform = "scale(1)"; }, 100);
         }
 
         window.onload = loadData;
