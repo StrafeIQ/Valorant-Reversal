@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valorant Reversal | 12.05</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #020408;
+            --card-bg: rgba(13, 17, 23, 0.8);
+            --accent-blue: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.4);
+            --text-main: #c9d1d9;
+            --text-dim: #8b949e;
+            --ida-gray: #30363d;
+            --discord-blurple: #5865F2;
+        }
+
+        * { cursor: none !important; }
+        #cursor {
+            width: 20px; height: 20px; border: 2px solid var(--accent-blue);
+            border-radius: 50%; position: fixed; pointer-events: none;
+            z-index: 9999; transition: transform 0.1s ease;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); 
+            color: var(--text-main); margin: 0; overflow-x: hidden;
+        }
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container { max-width: 1100px; width: 100%; margin: 40px auto; padding: 0 20px; }
+
+        header h1 {
+            font-size: 3.5rem; font-weight: 900; text-align: center; margin-bottom: 50px;
+            text-transform: uppercase; letter-spacing: 5px;
+            background: linear-gradient(270deg, #ffffff, var(--accent-blue), #ffffff);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s linear infinite;
+        }
+
+        .top-bar { display: flex; gap: 15px; margin-bottom: 40px; }
+        #searchBar { 
+            flex: 1; padding: 16px; border-radius: 12px; border: 1px solid var(--ida-gray); 
+            background: var(--card-bg); color: white; outline: none; backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        #searchBar:focus { border-color: var(--accent-blue); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .discord-btn { 
+            background: var(--discord-blurple); color: white; text-decoration: none; 
+            padding: 16px 30px; border-radius: 12px; font-weight: 700; 
+            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .discord-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(88, 101, 242, 0.4); }
+
+        .section-title { 
+            color: var(--accent-blue); text-transform: uppercase; font-size: 11px; 
+            margin: 50px 0 20px 0; letter-spacing: 2px; display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, var(--ida-gray), transparent); }
+
+        .interactive { 
+            background: var(--card-bg); border: 1px solid var(--ida-gray); 
+            backdrop-filter: blur(12px); border-radius: 12px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInScale 0.6s forwards; opacity: 0;
+        }
+        .interactive:hover { 
+            border-color: var(--accent-blue); background: rgba(88, 166, 255, 0.05); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(-5px);
+        }
+
+        .offset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .offset-card { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .val-text { font-family: 'Courier New', monospace; color: var(--accent-blue); font-size: 15px; font-weight: bold; margin-top: 5px; }
+
+        .sig-row { padding: 20px; margin-bottom: 15px; }
+        .sig-data { 
+            font-family: 'Courier New', monospace; font-size: 12px; color: var(--text-dim); 
+            background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed var(--ida-gray);
+        }
+
+        #toast { 
+            visibility: hidden; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            background: var(--accent-blue); color: #000; padding: 12px 30px; border-radius: 50px; 
+            font-weight: 800; z-index: 10000; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .show { visibility: visible !important; animation: fadeInScale 0.3s; }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="cursor"></div>
+
+<div class="container">
+    <header><h1>VALORANT REVERSAL</h1></header>
+
+    <div class="top-bar">
+        <input type="text" id="searchBar" placeholder="Search the void..." onkeyup="search()">
+        <a href="#" class="discord-btn"><i class="fab fa-discord"></i> JOIN DISCORD</a>
+    </div>
+
+    <div id="content">
+        <span class="section-title">Verified Memory Offsets</span>
+        <div class="offset-grid" id="offsetGrid"></div>
+        
+        <span class="section-title">Pattern Signatures</span>
+        <div id="sigGrid"></div>
+        
+        <span class="section-title">Utility Code</span>
+        <div id="codeVault"></div>
+    </div>
+</div>
+
+<div id="toast">DATA COPIED TO CLIPBOARD</div>
+
+<script>
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height, columns;
+    const fontSize = 16;
+    const chars = "01ABCDEF";
+    let drops = [];
+
+    function initBg() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        columns = Math.floor(width / fontSize);
+        drops = new Array(columns).fill(1);
+    }
+
+    function drawBg() {
+        ctx.fillStyle = "rgba(2, 4, 8, 0.1)";
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = "#58a6ff";
+        ctx.font = fontSize + "px monospace";
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    window.addEventListener('resize', initBg);
+    initBg();
+    setInterval(drawBg, 50);
+
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX - 10 + 'px';
+        cursor.style.top = e.clientY - 10 + 'px';
+    });
+
+    async function loadData() {
+        try {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            render(data);
+        } catch (err) {
+            console.error("Data.json missing in root!");
+        }
+    }
+
+    function render(data) {
+        const oGrid = document.getElementById('offsetGrid');
+        const sGrid = document.getElementById('sigGrid');
+        const cGrid = document.getElementById('codeVault');
+
+        data.offsets.forEach((o, i) => {
+            const el = document.createElement('div');
+            el.className = 'offset-card interactive';
+            el.style.animationDelay = (i * 0.05) + 's';
+            el.onclick = () => copy(o.val);
+            el.innerHTML = `<div><small style="color:var(--text-dim)">OFFSET</small><br><b>${o.name}</b><br><span class="val-text">${o.val}</span></div><i class="far fa-copy" style="opacity:0.2"></i>`;
+            oGrid.appendChild(el);
+        });
+
+        data.sigs.forEach((s, i) => {
+            const el = document.createElement('div');
+            el.className = 'sig-row interactive';
+            el.style.animationDelay = (i * 0.1) + 's';
+            el.onclick = () => copy(s.sig);
+            el.innerHTML = `<div style="display:flex; justify-content:space-between"><b>${s.name}</b><span style="color:#3fb950; font-size:10px">MATCH FOUND</span></div><div class="sig-data">${s.sig}</div>`;
+            sGrid.appendChild(el);
+        });
+
+        data.code.forEach((c, i) => {
+            const el = document.createElement('div');
+            el.className = 'interactive';
+            el.style.marginBottom = "20px";
+            el.style.animationDelay = "0.3s";
+            el.onclick = () => copy(c.content);
+            el.innerHTML = `<div style="padding:15px; background:rgba(88,166,255,0.1); border-bottom:1px solid var(--ida-gray);"><b>${c.title}</b></div><pre>${c.content}</pre>`;
+            cGrid.appendChild(el);
+        });
+    }
+
+    function search() {
+        let q = document.getElementById('searchBar').value.toLowerCase();
+        document.querySelectorAll('.interactive').forEach(el => {
+            el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    function copy(text) {
+        navigator.clipboard.writeText(text);
+        const t = document.getElementById('toast');
+        t.className = "show";
+        setTimeout(() => t.className = "", 1500);
+        cursor.style.transform = "scale(1.5)";
+        setTimeout(() => cursor.style.transform = "scale(1)", 200);
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
