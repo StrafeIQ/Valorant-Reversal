@@ -4,7 +4,7 @@
     { "name": "FNamePool", "val": "0xc25fb80", "status": "updated" },
     { "name": "LocalPlayer", "val": "0x0040", "status": "updated" },
     { "name": "MagicOffsets", "val": "0x46C4660", "status": "updated" },
-    { "name": "MeshComponent", "val": "0x04E8", status: "updated" },
+    { "name": "MeshComponent", "val": "0x04E8", "status": "updated" },
     { "name": "BypassPakSigning", "val": "0xC4472A8", "status": "updated" },
     { "name": "Mount", "val": "0x282CC50", "status": "updated" }
   ],
